@@ -1,5 +1,5 @@
-# Напиши здесь название своей курсовой
-Что-то про триплет лосс эмбеддинги для классификаци
+# Prediction of industrial cyber attacks using embeddings
+This model is trained for embeds using triplet loss. Embeddings use a classifier to detect anomalies.
 
 ## Implemented models
 - TripletLossModel
