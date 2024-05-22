@@ -1,5 +1,5 @@
 # Prediction of industrial cyber attacks using embeddings
-This model is trained for embeds using triplet loss. Embeddings use a classifier to detect anomalies.
+This model is trained for embeds using triplet loss. Embeddings use a GradientBoostingClassifier to detect anomalies.
 
 ## Implemented models
 - TripletLossModel
