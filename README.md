@@ -13,12 +13,9 @@ This model is trained for embeds using triplet loss. Embeddings use a GradientBo
 python run_experiment.py
 ```
 ## Results
+TSNE-2d plots trained on pure features and embeddings respectively: 
+![img.png](images/tsne_on_pure_features.png)
+![img.png](images/tsne_on_embeddings.png)
 ## Metrics
-
-## Support
-
-- Home: [https://github.com/DeineBlume/probaforms.git](https://github.com/DeineBlume/probaforms.git)
-
-
 
 
