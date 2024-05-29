@@ -10,14 +10,7 @@ else:
 
 
 class TripletLossModel(nn.Module):
-    '''
-    Invertible function interface for normalizing flow models.
 
-    Parameters:
-    -----------
-    var_size: int
-        Input vector size.
-    '''
     def __init__(self, model = None):
         super(TripletLossModel, self).__init__()
         if model is None:
@@ -27,6 +20,12 @@ class TripletLossModel(nn.Module):
             model.add_module("l3", nn.Linear(8096, 3))
             model.add_module("o", nn.Softmax(dim=-1))
             model.to(DEVICE)
+            learning_rate = 0.002
+            # создаем оптимизатор, который будет обновлять веса модели
+            optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+            scheduler = lr_scheduler.StepLR(optimizer, step_size=250, gamma=0.2, verbose=True)
+            criterion = nn.TripletMarginLoss(margin=1)
+
         self.model = model
 
     def load_model(self, model_path):

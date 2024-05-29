@@ -30,6 +30,9 @@ from torch.optim import lr_scheduler
 import wandb
 from tqdm.auto import trange
 
+import emb_tripletloss.models as emb_tripl
+import emb_tripletloss.dataset as emb_tripl_data
+
 import argparse
 import sys
 import re
@@ -85,6 +88,12 @@ def parse_args(args=sys.argv[1:]):
         type=int,
         help="Random state to set in project"
     )
+    g.add_argument(
+        '--train-model',
+        metavar="train model",
+        default=False,
+        help="Load weights model"
+    )
     return parser.parse_args(args)
 
 
@@ -118,6 +127,38 @@ def data_preparation(options):
     features_train, features_test, target_train, target_test = (
         train_test_split(features, target, test_size=0.3, random_state=options.)
     )
+def train_model(options):
+    if options. :
+        model = emb_tripl.TripletLossModel
+        train_ds = emb_tripl_data.TripletDataset(
+            X, y, train=True, device=device  # , transform = True
+        )
+        train_dataloader = DataLoader(train_ds, batch_size=64, shuffle=True)
+        model.train()
+        ep = 1500
+
+        t = trange(ep)
+        for epoch in t:
+            t.set_description(f"Epoch {epoch}")
+            running_loss = []
+            for anchor_feature, positive_feature, negative_feature, anchor_label in train_dataloader:  # берем батч из трейн лоадера
+                optimizer.zero_grad()
+                anchor_out = model(anchor_feature)
+                positive_out = model(positive_feature)
+                negative_out = model(negative_feature)
+                loss = criterion(anchor_out, positive_out, negative_out)
+                loss.backward()
+                optimizer.step()
+                running_loss.append(loss.cpu().detach().numpy())
+                wandb.log(
+                    {
+                        "mean val loss": np.mean(running_loss)
+                        #  "mean val accuracy": np.mean(val_accuracy),
+                    }
+                )
+
+    else:
+        model = emb_tripl.TripletLossModel.load_model('emb_tripletloss/models/weights_model')
 
 if __name__ == '__main__':
     pass
