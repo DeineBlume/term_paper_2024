@@ -12,23 +12,23 @@ This includes:
 import pandas as pd
 import random
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import torch
-import torch.nn.functional as F
-import torchvision
-from torchvision import transforms
-from torch import nn
-from tqdm.notebook import tqdm
+# import torch.nn.functional as F
+# import torchvision
+# from torchvision import transforms
+# from torch import nn
+# from tqdm.notebook import tqdm
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
-from torch.utils.data import TensorDataset, Dataset, DataLoader
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.metrics import roc_auc_score
-from sklearn.metrics import precision_recall_curve, auc
-from torch.optim import lr_scheduler
-import wandb
-from tqdm.auto import trange
+# from torch.utils.data import TensorDataset, Dataset, DataLoader
+# from sklearn.ensemble import GradientBoostingClassifier
+# from sklearn.metrics import accuracy_score, f1_score
+# from sklearn.metrics import roc_auc_score
+# from sklearn.metrics import precision_recall_curve, auc
+# from torch.optim import lr_scheduler
+# import wandb
+# from tqdm.auto import trange
 
 import argparse
 import sys
@@ -47,6 +47,9 @@ logger = logging.getLogger(
     )[0]
 )
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
+from emb_tripletloss.models.tripletlossmodel import TripletLossModel
+
 
 class CustomFormatter(argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter): pass
 
@@ -70,13 +73,13 @@ def parse_args(args=sys.argv[1:]):
         "--debug", "-d",
         action="store_true",
         default=False,
-        help="enable debugging"
+        help="Enable debugging"
     )
     g.add_argument(
         "--silent", "-s",
         action="store_true",
         default=False,
-        help="don't log to console"
+        help="Don't log to console"
     )
     g.add_argument(
         '--random-state',
@@ -85,6 +88,35 @@ def parse_args(args=sys.argv[1:]):
         type=int,
         help="Random state to set in project"
     )
+    g.add_argument(
+        "--pretrained",
+        metavar="pretrained",
+        default=True,
+        type=bool,
+        help="Should we use pretrained model or not"
+    )
+    g.add_argument(
+        '--n-in',
+        metavar="input dimention",
+        default=128,
+        type=int,
+        help="Amount of input features"
+    )
+    g.add_argument(
+        '--n-hidden',
+        metavar="hidden dimension",
+        default=42,
+        type=int,
+        help="Dimension of hidden space"
+    )
+    g.add_argument(
+        '--n-out',
+        metavar="output dimension",
+        default=42,
+        type=int,
+        help="Amount of output features"
+    )
+
     return parser.parse_args(args)
 
 
@@ -116,8 +148,33 @@ def data_preparation(options):
     target = np.squeeze(target_encoder.fit_transform(input_data[['marker']]))
 
     features_train, features_test, target_train, target_test = (
-        train_test_split(features, target, test_size=0.3, random_state=options.)
+        train_test_split(features, target, test_size=0.3, random_state=options.random_state)
     )
+    features_train = torch.tensor(features_train, device=device, dtype=torch.float)
+    features_test = torch.tensor(features_test, device=device, dtype=torch.float)
+    target_train = torch.tensor(target_train, device=device, dtype=torch.float)
+    target_test = torch.tensor(target_test, device=device, dtype=torch.float)
+    return {
+        'train': {'features': features_train, 'target': target_train},
+        'test': {'features': features_test, 'target': target_test}
+    }
+
+
+def init_model(options) -> torch.nn.Module:
+    if options.pretrained:
+        return TripletLossModel().load_model('emb_tripletloss/models/weights_model')
+    return TripletLossModel(n_in=options.n_in, n_hidden=options.n_hidden, n_out=options.n_out)
+
 
 if __name__ == '__main__':
-    pass
+    options = parse_args()
+    setup_logging(options)
+
+    logger.info('prepare data')
+    data = data_preparation(options)
+    logger.info(f'train shapes {data["train"]["features"].shape}')
+    logger.info(f'test shapes {data["test"]["features"].shape}')
+    logger.info(f'initiate model')
+    model = init_model(options)
+    num_params = sum(torch.numel(p) for p in model.parameters())
+    logger.info(f'model has {num_params} parameters')

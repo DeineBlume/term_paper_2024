@@ -1,1 +1,5 @@
-scikit-learn==1.4.3
+pandas==2.1.4
+scikit-learn==1.4.0
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
