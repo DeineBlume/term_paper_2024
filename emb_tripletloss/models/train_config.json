@@ -1,0 +1,15 @@
+{
+  "num_epochs": 2000,
+  "validate_freq": 5
+  "optimizer": {
+    "lr": 0.03
+  },
+  "scheduler": {
+    "step_size": 500,
+    "gamma": 0.2,
+    "verbose": true
+  },
+  "criterion": {
+    "margin": 1
+  }
+}
