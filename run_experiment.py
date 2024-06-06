@@ -30,6 +30,9 @@ from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
 from tqdm.auto import trange
 
+import emb_tripletloss.models as emb_tripl
+import emb_tripletloss.dataset as emb_tripl_data
+
 import argparse
 import sys
 import re

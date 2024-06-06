@@ -33,7 +33,6 @@ class TripletLossModel(nn.Module):
                     n_hidden_prev = n_hidden_i
                 model.add_module("output_layer", nn.Linear(n_hidden_prev, n_out))
                 model.add_module("output_activation", nn.Softmax(dim=-1))
-        self.model = model
 
     def load_model(self, model_path):
         self.model = nn.Sequential()
